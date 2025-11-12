@@ -1,0 +1,245 @@
+Experiment 5
+clc;
+clear;
+close;
+count = csvRead("C:\Program Files\scilab-2025.0.0\EXPT 5-RP .csv.sci");
+mu = [];
+sigma = [];
+for i = 1:3
+    scf(i);
+    mu(i) = mean(count(:, i));
+    sigma(i) = stdev(count(:, i));
+    
+    histplot(24, count(:, i));
+    xtitle("Histogram of Traffic Intersection " + string(i));
+end
+meantotal = mean(mean(count));
+
+disp("Mean of individual traffic intersections = " + string(mu));
+disp("Standard deviation of individual traffic intersections = " + string(sigma));
+disp("Overall mean = " + string(meantotal));
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+experiment 6
+clc;
+clear;
+close;
+exec("C:\Program Files\scilab-2025.0.0\pskmod.sci", -1);
+exec("C:\Program Files\scilab-2025.0.0\qammod (1).sci", -1);
+
+N = 4;
+M = 2^N;
+x = 0:M-1;
+
+// PSK Modulation
+z = pskmod(x, M);
+scf(0);
+subplot(1,2,1);
+scatter(real(z), imag(z), "fill");
+h = gca();
+h.data_bounds = [-1.5, 1.5,-1.5, 1.5];
+xtitle('M-ary PSK', 'In-phase', 'Quadrature');
+
+// QAM Modulation
+y = qammod(x, M);
+
+subplot(1,2,2);
+scatter(real(y), imag(y), "fill");
+h = gca();
+h.data_bounds = [-3.5, 3.5, -3.5, 3.5];
+xtitle('M-QAM', 'In-phase', 'Quadrature');
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Experiment 7
+clc;
+ clear;
+ close;
+ exec('C:\scilab_projects\user defined functions\awgn.sci'); 
+data_bits = 100000; 
+b = rand(1, data_bits) > 0.5; 
+s = 2 * b - 1; 
+SNRdB = 0:9; 
+for k = 1:length(SNRdB) 
+    y = awgn(s, SNRdB(k));
+    error = 0;
+    for c = 1:data_bits
+        if ((y(c) > 0 & s(c) == -1) | (y(c) < 0 & s(c) == 1)) then 
+            error = error + 1;
+        end
+    end  
+    BER(k) = error / data_bits; 
+ end    
+SNR = 10.^(SNRdB / 10); 
+BER_thBPSK = (1 / 2) * erfc(sqrt(SNR));
+ BER_thQPSK = erfc(sqrt(SNR));
+ scf(); 
+semilogy(SNRdB, BER, 'r', 'LineWidth', 2);
+ xtitle('Probability of Error Graph', 'SNR (dB)', 'BER');
+ xgrid; 
+semilogy(SNRdB, BER_thBPSK, 'k', 'LineWidth', 2);
+ semilogy(SNRdB, BER_thQPSK, 'b', 'LineWidth', 2);
+ legend('Simulated BPSK', 'Theoretical BPSK', 'Theoretical QPSK');
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Experiment 8
+ clc;
+ clear all;
+ P_XY=input('enter joint probability matrix ');
+ [m,n]=size(P_XY);
+ for i=1:m
+    px(i)=0;
+    for j=1:n
+        px(i)=px(i)+P_XY(i,j);
+    end
+ end
+ disp('P(X) matrix is:')
+ disp(px);
+ hx=sum(-px.*log2(px));
+ disp('Input entropy H(X) is:')
+ disp(hx);
+ for i=1:n
+    py(i)=0;
+    for j=1:m
+        py(i)=py(i)+P_XY(j,i);
+    end
+ end
+ disp('P(Y) matrix is:')
+ disp(py);
+ hy=sum(-py.*log2(py));
+ disp('Output entropy H(Y) is:')
+ disp(hy);
+ h_xy=0;
+ for i=1:m
+    for j=1:n
+    h_xy=h_xy+P_XY(i,j)*log2(1/P_XY(i,j));
+ end
+ end
+ disp('Entropy H(XY) is:')
+ disp(h_xy);
+ hxby=h_xy-hy;
+ hybx=h_xy-hx;
+ ixy=hx+hy-h_xy;
+ disp('Mutual Information I(X,Y) is:')
+ disp(ixy);
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Experiment 9
+
+ clc;
+ clear;
+ n = 
+k = 
+p = 
+input('Enter the codeword length in LBC (n): ');
+ input('Enter the number of message bits in LBC (m): ');
+ input('Enter the parity check matrix ');
+ g = [eye(k,k)p];
+ disp('Generator matrix',g);
+ d = [0 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 0; 1 0 1; 1 1 0; 1 1 1]
+ c = 
+modulo(d*g, 2);
+ disp('all codewords',c);
+ Hw = zeros(2^k, 1);
+ for i = 1:2^k
+    wt = 0;
+    for j = 1:n
+        if c(i, j) == 1 then
+            wt = wt + 1;
+        end
+    end
+    Hw(i) = wt;
+ end
+ y = [c, Hw];
+ disp('code vector with hamming weight',y);
+ dmin = Hw(2);
+ for i = 2:2^k
+    if dmin > Hw(i) then
+        dmin = Hw(i);
+    end
+ end
+ disp('Minimum Hamming Distance is ',dmin);
+ td = dmin - 1;
+disp('Error Detection Capability of code(in bits) is ',td);
+ tc = (dmin - 1) / 2;
+ disp('Error Correctionn Capability of code(in bits) is ', tc);
+ disp('Transpose of parity matrix is ',p');
+ H = [p', eye(n - k, n - k)];
+ disp('Parity check matrix is ',H);
+ disp('Transpose of parity check matrix is ',H');
+ r = 
+input('Enter the received codeword');
+ synd = 
+modulo(r * H', 2);
+ disp('Syndrome for received codeword is ',synd);
+ for i = 1:size(H', 1)
+    if H'(i, 1:n - k) == synd then
+        r(i) = 1 - r(i);
+        disp('By matching this syndrome with different rows of Traspose of parity check matrix, Error is 
+at location ',i);
+    end
+ end
+ disp('Corrected codeword is ',r);
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Experiment 10
+
+clc;
+ clear;
+ exec('C:\scilab_projects\user defined functions\deconv.sci');
+ n = 
+k = 
+input('Enter the length of codeword : ');
+ input('Enter the length of message : ');
+ gen_coff = 
+m = 
+input('Enter the generator coefficient : ');
+ input('Enter the message : ');
+ y2 = [1];
+ a = zeros(1, n - k);
+ z1 = [y2 a]; 
+x = 
+conv(z1, m); 
+x1 = 
+pmodulo(x, 2); 
+[q, r] = deconv(x1,gen_coff); 
+r1 = [zeros(1, length(x1) - length(r)),r]; 
+codeword = 
+bitxor(x1,r1); //codeword = (x1 & ~r1) | (~x1 & r1);  
+disp('CYCLIC CODEWORD= ',codeword*1);
+ rec = 
+input('Enter the received codeword : ');
+ [q,r] = deconv(rec, gen_coff); 
+syn = 
+pmodulo(r, 2); 
+disp('Syndrome for received codeword is:',syn); 
+if syn == 0 then
+    disp('No error in received code, No need of correction ');
+ else
+    disp('Non zero syndrome indicates Error in received code');
+    syn = [zeros(1, length(x1) - length(syn)),syn];
+    y2 = zeros(n, n);
+    e = eye(n, n);  
+    for i = 1:n
+        [q, r] = deconv(e(i,:),gen_coff);
+        r1 = [zeros(1,n - length(r)),r];
+        y2(i,:) = 
+pmodulo(r1, 2);
+    end
+         for i = 1:n
+             if syn == y2(i,:) then
+               break
+             end
+         end
+         correctedCode=
+ bitxor(rec,e(i,:));
+   disp('CORRECTED CODEWORD= ',correctedCode*1);
+ end
